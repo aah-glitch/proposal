@@ -13,7 +13,12 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       min-height: 100vh;
       background: #000000;
@@ -27,52 +32,107 @@
       padding: 20px;
       overflow-x: hidden;
     }
-    .container { max-width: 90%; width: 100%; max-width: 640px; }
-    h1, .typing-text { font-size: clamp(1.6rem, 6vw, 2.4rem); line-height: 1.4; margin-bottom: 1.5rem; }
-    p, button { font-size: clamp(1.1rem, 4.5vw, 1.35rem); line-height: 1.6; }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      width: 100%;
+      max-width: 640px;
+      gap: 1.5rem;
+    }
+
+    h1, .typing-text, p {
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    h1, .typing-text {
+      font-size: clamp(1.8rem, 7vw, 2.8rem);
+      margin-bottom: 1.5rem;
+    }
+
+    p {
+      font-size: clamp(1.2rem, 5vw, 1.4rem);
+      margin-bottom: 1rem;
+    }
+
     button {
       font-family: 'Cairo', sans-serif;
       font-weight: 500;
-      padding: 14px 32px;
-      margin: 12px;
+      padding: 14px 36px;
+      margin: 12px 8px;
       border: none;
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.25s ease;
-      font-size: clamp(1.05rem, 4vw, 1.25rem);
-      min-width: 140px;
+      font-size: clamp(1.1rem, 4.5vw, 1.3rem);
+      min-width: 150px;
       touch-action: manipulation;
     }
+
     .btn-yes { background: #98fb98; color: #000; }
-    .btn-yes:hover { background: #7fff00; transform: translateY(-2px); }
+    .btn-yes:hover { background: #7fff00; transform: translateY(-3px); }
+
     .btn-no { background: #444; color: #e0e0e0; }
     .btn-no:hover { background: #555; }
+
     .btn-retry, .btn-final-no { background: #333; color: white; }
     .btn-retry:hover { background: #555; }
     .btn-final-no:hover { background: #c0392b; }
-    #intro, #questions-section, #video-section, #date-section, #final-section, #final-no-section { display: none; }
-    #typing { display: inline-block; white-space: pre-wrap; }
+
+    #intro, #questions-section, #video-section, #date-section, #final-section, #final-no-section {
+      display: none;
+      width: 100%;
+      text-align: center;
+    }
+
+    #typing {
+      display: inline-block;
+      white-space: pre-wrap;
+    }
+
+    #answer-buttons, #retry-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+    }
+
     video {
       width: 100%;
       max-width: 520px;
       border-radius: 16px;
-      margin: 20px 0;
+      margin: 1.5rem 0;
       box-shadow: 0 10px 30px rgba(0,0,0,0.7);
     }
+
     #date-picker {
       font-size: 1.2rem;
       padding: 12px;
-      margin: 20px 0;
+      margin: 1.5rem 0;
       border-radius: 10px;
       border: 1px solid #555;
       background: #111;
       color: #a0d8ef;
       width: 100%;
-      max-width: 320px;
+      max-width: 340px;
+      text-align: center;
     }
+
     .hidden { display: none !important; }
+
     @media (max-width: 500px) {
-      button { padding: 12px 24px; margin: 10px 6px; min-width: 120px; }
+      button {
+        padding: 12px 28px;
+        margin: 10px 6px;
+        min-width: 130px;
+      }
+      .container {
+        padding: 0 15px;
+      }
     }
   </style>
 </head>
@@ -99,7 +159,7 @@
   </div>
 
   <div id="video-section">
-    <p style="margin-bottom: 1rem;">شوفي الفيديو ده لحظة...</p>
+    <p style="margin-bottom: 1.2rem;">شوفي الفيديو ده لحظة...</p>
     <video id="proposal-video" autoplay playsinline>
       <source src="video.mp4" type="video/mp4">
       المتصفح لا يدعم تشغيل الفيديو
@@ -113,7 +173,6 @@
     <button class="btn-yes" id="btn-date-submit">إرسال</button>
   </div>
 
-  <!-- Final message when YES on last question + date submitted -->
   <div id="final-section">
     <h1 style="color: #98fb98; margin-bottom: 1.5rem;">ياااه يا حبيبتي! ♥</h1>
     <p style="font-size: 1.4rem; line-height: 1.7;">
@@ -122,7 +181,6 @@
     </p>
   </div>
 
-  <!-- Different final message when she clicks "لا، هذا كل شيء" -->
   <div id="final-no-section">
     <h1 style="color: #f8c471; margin-bottom: 1.5rem;">تمام يا قلبي ♥</h1>
     <p style="font-size: 1.3rem; line-height: 1.7;">
@@ -151,7 +209,6 @@
   let currentIdx = 0;
   let answers = [];
 
-  // Elements
   const introEl        = document.getElementById('intro');
   const questionsEl    = document.getElementById('questions-section');
   const videoSection   = document.getElementById('video-section');
@@ -171,7 +228,10 @@
   const btnDateSubmit  = document.getElementById('btn-date-submit');
   const celebration    = document.getElementById('celebration-sound');
 
-  introEl.style.display = 'block';
+  introEl.style.display = 'flex';
+  introEl.style.alignItems = 'center';
+  introEl.style.justifyContent = 'center';
+
   new Typed('#typing', {
     strings: [
       'يا أغلى الناس عندي...',
@@ -196,7 +256,9 @@
     btnYes.textContent = q.yes;
     btnNo.textContent  = q.no;
 
-    questionsEl.style.display = 'block';
+    questionsEl.style.display = 'flex';
+    questionsEl.style.flexDirection = 'column';
+    questionsEl.style.alignItems = 'center';
     answerButtons.style.display = 'flex';
     retryButtons.classList.add('hidden');
   }
@@ -225,10 +287,14 @@
     if (currentIdx === questions.length - 1) {
       celebrate();
       questionsEl.style.display = 'none';
-      dateSection.style.display = 'block';
+      dateSection.style.display = 'flex';
+      dateSection.style.flexDirection = 'column';
+      dateSection.style.alignItems = 'center';
     } else if (currentIdx === 2) {
       questionsEl.style.display = 'none';
-      videoSection.style.display = 'block';
+      videoSection.style.display = 'flex';
+      videoSection.style.flexDirection = 'column';
+      videoSection.style.alignItems = 'center';
       video.play().catch(() => console.log("Autoplay was blocked"));
     } else {
       currentIdx++;
@@ -287,9 +353,13 @@
         videoSection.style.display = 'none';
 
         if (finalType === 'yes') {
-          finalSection.style.display = 'block';
+          finalSection.style.display = 'flex';
+          finalSection.style.flexDirection = 'column';
+          finalSection.style.alignItems = 'center';
         } else {
-          finalNoSection.style.display = 'block';
+          finalNoSection.style.display = 'flex';
+          finalNoSection.style.flexDirection = 'column';
+          finalNoSection.style.alignItems = 'center';
         }
       } else {
         alert("حصل خطأ في الإرسال... جربي تاني");
